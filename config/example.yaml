@@ -1,0 +1,16 @@
+# rad-loader configuration
+#
+# Copy to ahjo.yaml and fill in real values.
+# ahjo.yaml is gitignored.
+
+pacs:
+  host: "193.143.202.115"
+  port: 104
+  ae_title: "med_imFIR"          # PACS AE title (called AE)
+
+scp:
+  ae_title: "AHJO-loader"       # Our AE title (calling AE / SCP)
+  port: 9012                     # Port for incoming C-STORE
+
+output:
+  base_dir: "/data/research"     # Base output directory

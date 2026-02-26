@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-rad-tools"
+version = "0.1.0"
+description = "PID-safe research image loader for hospital PACS"
+requires-python = ">=3.11"
+dependencies = [
+    "pydicom>=2.4",
+    "pynetdicom>=2.1",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+
+[project.scripts]
+rad-loader = "agent_rad_tools.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
