@@ -6,8 +6,8 @@ from unittest.mock import MagicMock, patch
 
 from pydicom.dataset import Dataset
 
-from agent_rad_tools.config import Config, OutputConfig, PacsConfig, ScpConfig
-from agent_rad_tools.pacs import _extract_safe_fields
+from pacs_agent.config import Config, OutputConfig, PacsConfig, ScpConfig
+from pacs_agent.pacs import _extract_safe_fields
 
 
 def _make_config() -> Config:
@@ -49,7 +49,7 @@ class TestExtractSafeFields:
 
 
 class TestEcho:
-    @patch("agent_rad_tools.pacs.AE")
+    @patch("pacs_agent.pacs.AE")
     def test_echo_success(self, mock_ae_cls):
         config = _make_config()
 
@@ -62,13 +62,13 @@ class TestEcho:
         mock_assoc.send_c_echo.return_value = mock_status
         mock_ae.associate.return_value = mock_assoc
 
-        from agent_rad_tools.pacs import echo
+        from pacs_agent.pacs import echo
         result = echo(config)
 
         assert result is True
         mock_assoc.release.assert_called_once()
 
-    @patch("agent_rad_tools.pacs.AE")
+    @patch("pacs_agent.pacs.AE")
     def test_echo_not_established(self, mock_ae_cls):
         config = _make_config()
 
@@ -78,14 +78,14 @@ class TestEcho:
         mock_assoc.is_established = False
         mock_ae.associate.return_value = mock_assoc
 
-        from agent_rad_tools.pacs import echo
+        from pacs_agent.pacs import echo
         result = echo(config)
 
         assert result is False
 
 
 class TestFindByAccession:
-    @patch("agent_rad_tools.pacs.AE")
+    @patch("pacs_agent.pacs.AE")
     def test_returns_safe_fields(self, mock_ae_cls):
         config = _make_config()
 
@@ -107,7 +107,7 @@ class TestFindByAccession:
         mock_status.Status = 0xFF00
         mock_assoc.send_c_find.return_value = [(mock_status, response_ds)]
 
-        from agent_rad_tools.pacs import find_by_accession
+        from pacs_agent.pacs import find_by_accession
         results = find_by_accession(config, "AC001")
 
         assert len(results) == 1

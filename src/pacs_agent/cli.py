@@ -30,8 +30,8 @@ def main(argv: list[str] | None = None) -> None:
     parser.add_argument(
         "--config",
         type=Path,
-        default=Path("config/ahjo.yaml"),
-        help="Path to YAML config file (default: config/ahjo.yaml)",
+        default=Path("config/config.yaml"),
+        help="Path to YAML config file (default: config/config.yaml)",
     )
     parser.add_argument(
         "--human",

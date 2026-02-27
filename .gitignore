@@ -4,5 +4,7 @@ __pycache__/
 *.egg-info/
 dist/
 build/
-config/ahjo.yaml
 .pytest_cache/
+.env
+config/*.yaml
+!config/example.yaml

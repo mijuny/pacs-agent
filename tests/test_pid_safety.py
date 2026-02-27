@@ -16,8 +16,8 @@ from pathlib import Path
 import pydicom
 from pydicom.tag import Tag
 
-from agent_rad_tools.anonymize import anonymize_file
-from agent_rad_tools.tags import PHI_TAGS
+from pacs_agent.anonymize import anonymize_file
+from pacs_agent.tags import PHI_TAGS
 
 # Minimum PHI string length for byte-level scan.
 # Shorter strings appear randomly in binary pixel data.
@@ -57,7 +57,7 @@ class TestBytelevelPIDSafety:
         anonymize_file(ct1_path, dst, "case0001")
 
         raw_bytes = dst.read_bytes()
-        assert b"agent-rad-tools allowlist v1" in raw_bytes
+        assert b"pacs-agent allowlist v1" in raw_bytes
 
 
 class TestTagLevelPIDSafety:
@@ -93,7 +93,7 @@ class TestAllTestFilesSafety:
         can collide with PHI values (e.g. "TOSHIBA" as InstitutionName
         AND Manufacturer).
         """
-        from agent_rad_tools.tags import is_private_tag
+        from pacs_agent.tags import is_private_tag
 
         reset_tags = {Tag(0x0010, 0x0010), Tag(0x0010, 0x0020)}
 

@@ -17,7 +17,7 @@ class PacsConfig:
 
 @dataclass
 class ScpConfig:
-    ae_title: str = "AHJO-loader"  # Our AE title
+    ae_title: str = "MY-LOADER"  # Our AE title
     port: int = 9012
 
 
@@ -46,7 +46,7 @@ class Config:
 
         scp_raw = raw.get("scp", {})
         scp = ScpConfig(
-            ae_title=scp_raw.get("ae_title", "AHJO-loader"),
+            ae_title=scp_raw.get("ae_title", "MY-LOADER"),
             port=int(scp_raw.get("port", 9012)),
         )
 

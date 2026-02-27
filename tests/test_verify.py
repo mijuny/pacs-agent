@@ -2,8 +2,8 @@
 
 from dataclasses import dataclass
 
-from agent_rad_tools.keyfile import KeyEntry
-from agent_rad_tools.verify import verify_load, verify_project
+from pacs_agent.keyfile import KeyEntry
+from pacs_agent.verify import verify_load, verify_project
 
 
 @dataclass

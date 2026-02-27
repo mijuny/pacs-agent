@@ -10,6 +10,11 @@ import pytest
 DICOM_TEST_DIR = Path.home() / "projects" / "dicom-test-files" / "data" / "WG04"
 REF_DIR = DICOM_TEST_DIR / "REF"
 
+requires_dicom_files = pytest.mark.skipif(
+    not REF_DIR.exists(),
+    reason=f"DICOM test files not found at {REF_DIR}",
+)
+
 
 def _decompress_zst(zst_path: Path, out_path: Path) -> Path:
     """Decompress a .zst file if the output doesn't exist."""
@@ -26,6 +31,8 @@ def _decompress_zst(zst_path: Path, out_path: Path) -> Path:
 @pytest.fixture(scope="session")
 def tmp_dcm_dir(tmp_path_factory: pytest.TempPathFactory) -> Path:
     """Decompress test DICOM files into a temp directory."""
+    if not REF_DIR.exists():
+        pytest.skip(f"DICOM test files not found at {REF_DIR}")
     out = tmp_path_factory.mktemp("dcm")
     for zst in sorted(REF_DIR.glob("*.zst")):
         name = zst.stem  # e.g. CT1_UNC

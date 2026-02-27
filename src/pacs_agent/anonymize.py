@@ -54,7 +54,7 @@ def anonymize_dataset(ds: Dataset, case_id: str) -> Dataset:
 
     # Mark as deidentified
     ds.PatientIdentityRemoved = "YES"
-    ds.DeidentificationMethod = "agent-rad-tools allowlist v1"
+    ds.DeidentificationMethod = "pacs-agent allowlist v1"
 
     return ds
 

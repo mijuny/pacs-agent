@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from agent_rad_tools.keyfile import KeyEntry, next_case_id, read_key_file, write_key_file
+from pacs_agent.keyfile import KeyEntry, next_case_id, read_key_file, write_key_file
 
 
 class TestKeyFileRoundtrip:

@@ -3,11 +3,18 @@
 # Usage: ./researcher-load.sh <project> <accession-file>
 #
 # This script is the intended interface for researchers.
-# Run on ahjo or via: ssh ahjo "/data/apps/agent-rad-tools/scripts/researcher-load.sh ..."
+# Adjust LOADER path to your installation.
 
 set -euo pipefail
 
-LOADER="/data/apps/agent-rad-tools/.venv/bin/rad-loader"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+LOADER="${SCRIPT_DIR}/../.venv/bin/rad-loader"
+
+if [ ! -x "$LOADER" ]; then
+    echo "Error: rad-loader not found at $LOADER"
+    echo "Install: cd $(dirname "$SCRIPT_DIR") && python -m venv .venv && .venv/bin/pip install -e ."
+    exit 1
+fi
 
 usage() {
     echo "Usage:"
@@ -16,8 +23,6 @@ usage() {
     echo "  $0 load <project> <file>         # Load studies from file"
     echo "  $0 load <project> <file> --dry-run  # Preview without loading"
     echo "  $0 status <project>              # Check project status"
-    echo ""
-    echo "Output: /data/research/<project>/"
     exit 1
 }
 
@@ -39,7 +44,6 @@ case "$1" in
         [ ! -f "$file" ] && { echo "Error: file not found: $file"; exit 1; }
         echo "Project: $project"
         echo "Accessions: $file ($(grep -cv '^#\|^$' "$file" || true) entries)"
-        echo "Output: /data/research/$project/"
         echo ""
         exec "$LOADER" --human load "$project" --file "$file" "$@"
         ;;

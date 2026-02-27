@@ -7,8 +7,8 @@ from pathlib import Path
 import pydicom
 from pydicom.tag import Tag
 
-from agent_rad_tools.anonymize import anonymize_dataset, anonymize_file
-from agent_rad_tools.tags import PHI_TAGS, is_private_tag
+from pacs_agent.anonymize import anonymize_dataset, anonymize_file
+from pacs_agent.tags import PHI_TAGS, is_private_tag
 
 # Tags we explicitly re-set with case_id — they'll be present but safe
 _RESET_TAGS = {Tag(0x0010, 0x0010), Tag(0x0010, 0x0020)}

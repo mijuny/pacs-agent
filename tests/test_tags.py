@@ -2,7 +2,7 @@
 
 from pydicom.tag import Tag
 
-from agent_rad_tools.tags import KEEP_TAGS, PHI_TAGS, is_private_tag
+from pacs_agent.tags import KEEP_TAGS, PHI_TAGS, is_private_tag
 
 
 class TestPHICoverage:

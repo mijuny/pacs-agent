@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from agent_rad_tools.audit import get_db, log_results, query_audit
+from pacs_agent.audit import get_db, log_results, query_audit
 
 
 @dataclass

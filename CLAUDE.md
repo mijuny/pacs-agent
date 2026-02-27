@@ -1,38 +1,38 @@
 # rad-loader — Agent Instructions
 
+> Adapt paths below to your installation.
+
 ## What this tool does
 
 `rad-loader` loads anonymized DICOM images from hospital PACS for research. It is **PID-safe by design** — no patient names, IDs, or birth dates ever appear in output, logs, or saved files.
 
 ## Available commands
 
-All commands run on **ahjo** via SSH:
-
 ```bash
 # Test PACS connection
-ssh ahjo "/data/apps/agent-rad-tools/.venv/bin/rad-loader echo"
+rad-loader echo
 
 # Query a study by accession number (returns JSON, no images downloaded)
-ssh ahjo "/data/apps/agent-rad-tools/.venv/bin/rad-loader query <ACCESSION>"
+rad-loader query <ACCESSION>
 
-# Load studies (downloads, anonymizes, saves to /data/research/<project>/)
-ssh ahjo "/data/apps/agent-rad-tools/.venv/bin/rad-loader load <project> <AC1> <AC2> ..."
+# Load studies (downloads, anonymizes, saves to output directory)
+rad-loader load <project> <AC1> <AC2> ...
 
 # Load from file (one accession per line, # comments allowed)
-ssh ahjo "/data/apps/agent-rad-tools/.venv/bin/rad-loader load <project> --file <path>"
+rad-loader load <project> --file <path>
 
 # Dry run (query only, no download)
-ssh ahjo "/data/apps/agent-rad-tools/.venv/bin/rad-loader load <project> --file <path> --dry-run"
+rad-loader load <project> --file <path> --dry-run
 
 # Check project status (includes outlier detection)
-ssh ahjo "/data/apps/agent-rad-tools/.venv/bin/rad-loader status <project>"
+rad-loader status <project>
 
 # View audit log for a project
-ssh ahjo "/data/apps/agent-rad-tools/.venv/bin/rad-loader audit <project>"
-ssh ahjo "/data/apps/agent-rad-tools/.venv/bin/rad-loader audit <project> --last 50"
+rad-loader audit <project>
+rad-loader audit <project> --last 50
 
 # View all audit entries (cross-project)
-ssh ahjo "/data/apps/agent-rad-tools/.venv/bin/rad-loader audit --all"
+rad-loader audit --all
 ```
 
 ## Important rules
@@ -41,7 +41,6 @@ ssh ahjo "/data/apps/agent-rad-tools/.venv/bin/rad-loader audit --all"
 - **Output**: JSON by default. Add `--human` before the subcommand for readable output.
 - **Global flags** (`--human`, `-v`, `--config`) go BEFORE the subcommand.
 - **Already loaded** studies are automatically skipped — safe to re-run.
-- **Output location**: `/data/research/<project>/` on ahjo.
 - **key.csv** maps case IDs (case0001, case0002, ...) to accession numbers.
 
 ## Troubleshooting
@@ -49,7 +48,7 @@ ssh ahjo "/data/apps/agent-rad-tools/.venv/bin/rad-loader audit --all"
 If a load fails or behaves unexpectedly, re-run with `-v` (verbose) for detailed DICOM-level logging including pydicom validation warnings and pynetdicom network traffic:
 
 ```bash
-ssh ahjo "/data/apps/agent-rad-tools/.venv/bin/rad-loader -v load <project> <AC>"
+rad-loader -v load <project> <AC>
 ```
 
 Without `-v`, pydicom/pynetdicom warnings are suppressed to keep output clean.
@@ -57,7 +56,7 @@ Without `-v`, pydicom/pynetdicom warnings are suppressed to keep output clean.
 ## Output structure
 
 ```
-/data/research/
+<output_base_dir>/
 ├── audit.db                    # Global audit database (SQLite)
 ├── <project>/
 │   ├── key.csv                 # case_id,accession,study_date,modality,description,series_count,image_count
