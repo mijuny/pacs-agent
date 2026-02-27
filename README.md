@@ -7,11 +7,49 @@
 
 CLI tool: `rad-loader`
 
-## The Problem
+## Why This Exists
 
-Loading DICOM images from hospital PACS for research is risky. Patient identifiers (names, IDs, birth dates) leak easily into research directories, logs, and AI agent outputs. Existing tools either skip anonymization entirely or treat it as an optional step.
+AI agents are becoming the primary interface for hospital IT tasks. A radiologist using Claude Code can query PACS, manage research data, and automate HL7 workflows faster than navigating GUIs or writing one-off scripts. Agent-driven workflows are not a future possibility — they are already more efficient than the alternatives for many tasks.
 
-pacs-agent solves this by making anonymization **mandatory and automatic**. There is no way to retrieve images without them being anonymized first. The tool is designed to be operated by AI agents (JSON output, structured errors, idempotent operations) while remaining usable by researchers directly.
+But there is a fundamental problem: **the agent's context window is a PHI leak vector.**
+
+When an AI agent runs `dcm4che` or reads DICOM headers, patient names, IDs, and birth dates flow into the agent's context. That context is sent to cloud servers (Anthropic, OpenAI, etc.). This is a privacy violation under GDPR, HIPAA, and most hospital data protection policies — regardless of how the cloud provider handles the data.
+
+Existing DICOM tools were not designed with this threat model in mind. They predate LLM agents and treat PHI as something the *user* manages. They output unstructured text that agents must parse. They have no concept of an agent's context window as an attack surface.
+
+pacs-agent addresses both problems:
+
+1. **PHI never enters the agent's context.** The tool acts as a privacy gateway between the agent and hospital systems. Input is accession numbers (not patient identifiers). Output uses pseudonymized case IDs. Anonymization is mandatory and happens inside the tool — there is no code path that exposes PHI to the caller.
+
+2. **The tool is designed for agent operation.** Structured JSON output. Machine-readable errors. Idempotent operations that are safe to retry. Built-in verification so the agent can assess data quality programmatically instead of visually.
+
+```
+  Cloud                          Hospital network
+┌─────────────┐               ┌─────────────────────────────────┐
+│ AI Agent    │               │                                 │
+│ (LLM)      │──accession──▶ │  pacs-agent     ──▶  PACS       │
+│             │◀──case ID───  │  (PHI gateway)                  │
+│             │               │                                 │
+│ Never sees: │               │  Handles internally:            │
+│ - names     │               │  - patient names                │
+│ - IDs       │               │  - patient IDs                  │
+│ - DOB       │               │  - birth dates                  │
+│ - any PHI   │               │  - all PHI tags                 │
+└─────────────┘               └─────────────────────────────────┘
+```
+
+### Design principles for agent-safe hospital tools
+
+pacs-agent is an implementation of a broader pattern. Any tool that lets an AI agent interact with hospital systems should follow these principles:
+
+1. **No PHI in agent context** — the tool handles PHI internally and returns only de-identified or coded data. The agent never needs to see a patient name to do its job.
+2. **Structured, machine-readable output** — JSON by default, not human text that agents have to parse with regex.
+3. **Idempotent operations** — agents retry on failure. Tools must handle duplicate requests gracefully (already-loaded studies are skipped, not duplicated).
+4. **Built-in verification** — agents cannot visually inspect results. The tool must provide programmatic quality checks (outlier detection, completeness verification).
+5. **Audit trail** — every action is logged with who, what, when, and outcome. Non-negotiable for clinical data.
+6. **Accession-based addressing** — accession numbers are the natural unit of work for research. They identify studies without revealing patient identity.
+
+This pattern extends beyond PACS. HL7 message routing, RIS queries, report retrieval, DICOM routing — anywhere an agent touches hospital data, the same architecture applies: a local tool that acts as a PHI firewall, exposing only what the agent needs to see.
 
 ## Architecture
 
@@ -48,7 +86,7 @@ Researcher / AI Agent
 ```
 
 **Key design choices:**
-- **Allowlist anonymization** — only explicitly listed DICOM tags survive. Everything else is deleted.
+- **Allowlist anonymization** — only explicitly listed DICOM tags survive. Everything else is deleted. Safer than a blocklist, where new or unexpected tags could slip through.
 - **No patient identifiers in I/O** — input is accession numbers only, output uses case IDs (case0001, case0002, ...).
 - **Idempotent** — already-loaded studies are skipped automatically. Safe to re-run.
 - **Audit trail** — every load is recorded in a SQLite database.
@@ -253,9 +291,12 @@ pacs-agent uses an **allowlist** approach: only DICOM tags explicitly listed in 
 
 pacs-agent is designed to be operated by AI agents (Claude Code, etc.). All commands output structured JSON by default.
 
-### CLAUDE.md template
+### How it works with Claude Code
 
-Add this to your project's `CLAUDE.md` to teach Claude Code how to use rad-loader. See [CLAUDE.md](CLAUDE.md) in this repository for a ready-to-use template.
+1. Add the [CLAUDE.md](CLAUDE.md) template to your project — it teaches the agent all available commands, flag ordering, and the verification workflow.
+2. The agent uses accession numbers as input (provided by the researcher).
+3. The agent receives JSON responses with case IDs, image counts, and verification results — never patient data.
+4. The agent can run the full workflow: query, load, verify, report outliers — without any PHI ever entering its context.
 
 ### Accession file format
 
